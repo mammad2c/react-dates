@@ -125,7 +125,6 @@ class DateInput extends React.PureComponent {
     // In Safari, onKeyDown does not consistently fire ahead of onChange. As a result, we need to
     // special case the `?` key so that it always triggers the appropriate callback, instead of
     // modifying the input value
-    console.log('dateString: ', dateString);
     if (dateString[dateString.length - 1] === '?') {
       onKeyDownQuestionMark(e);
     } else {

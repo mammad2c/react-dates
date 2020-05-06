@@ -121,10 +121,6 @@ class CalendarDay extends React.PureComponent {
       ariaLabel,
     } = getCalendarDaySettings(day, ariaLabelFormat, daySize, modifiers, phrases);
 
-    // if (day.jMonth() === 11 && day.jDate() === 1) {
-    //   console.log('isOutSideRange: ', isOutsideRange);
-    // }
-
     return (
       <td
         {...css(

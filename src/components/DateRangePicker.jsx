@@ -214,8 +214,6 @@ class DateRangePicker extends React.PureComponent {
       showKeyboardShortcuts: false,
     });
 
-    console.log('startDate: ', startDate.format('jYYYY/jMM/jDD'));
-
     onFocusChange(null);
     onClose({ startDate, endDate });
   }

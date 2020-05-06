@@ -40,7 +40,6 @@ class DateRangePickerWrapper extends React.Component {
     super(props);
     jMoment.locale('fa');
     jMoment.loadPersian({
-      dialect: 'persian',
       usePersianDigits: false,
     });
 

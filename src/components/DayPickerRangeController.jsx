@@ -918,20 +918,17 @@ export default class DayPickerRangeController extends React.PureComponent {
       onPrevMonthClick,
     } = this.props;
     const { currentMonth, visibleDays } = this.state;
+    const formatM = moment.locale() === 'fa' ? 'jMonth' : 'month';
 
     const newVisibleDays = {};
     Object.keys(visibleDays).sort().slice(0, numberOfMonths + 1).forEach((month) => {
       newVisibleDays[month] = visibleDays[month];
     });
 
-    const prevMonth = currentMonth.clone().subtract(1, moment.locale() === 'fa' ? 'jMonth' : 'month');
-    console.log('-----------------------------------------------')
-    // console.log('newVisibleDays: ', newVisibleDays);
-    // console.log('currentMonth: ', currentMonth.format('jYYYY/jMM/jDD'));
-    // console.log('prevMonth: ', prevMonth.format('jYYYY/jMM/jDD'));
-    console.log('-----------------------------------------------')
-    const prevMonthVisibleDays = getVisibleDays(prevMonth, numberOfMonths + 1, enableOutsideDays, true);
-    const newCurrentMonth = currentMonth.clone().subtract(1, 'month');
+    const prevMonth = currentMonth.clone().subtract(numberOfMonths + 1, formatM);
+    const prevMonthVisibleDays = getVisibleDays(prevMonth,
+      numberOfMonths + 1, enableOutsideDays, true);
+    const newCurrentMonth = currentMonth.clone().subtract(1, formatM);
     this.setState({
       currentMonth: newCurrentMonth,
       disablePrev: this.shouldDisableMonthNavigation(minDate, newCurrentMonth),
@@ -961,7 +958,8 @@ export default class DayPickerRangeController extends React.PureComponent {
     });
 
     const nextMonth = currentMonth.clone().add(numberOfMonths + 1, formatM);
-    const nextMonthVisibleDays = getVisibleDays(nextMonth, 1, enableOutsideDays, true);
+    const nextMonthVisibleDays = getVisibleDays(nextMonth, numberOfMonths + 1,
+      enableOutsideDays, true);
     const newCurrentMonth = currentMonth.clone().add(1, formatM);
     this.setState({
       currentMonth: newCurrentMonth,
@@ -1345,8 +1343,6 @@ export default class DayPickerRangeController extends React.PureComponent {
       disablePrev,
       disableNext,
     } = this.state;
-
-    // console.log(visibleDays);
 
     return (
       <DayPicker
