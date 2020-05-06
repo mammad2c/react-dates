@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import momentPropTypes from 'react-moment-proptypes';
 import { forbidExtraProps } from 'airbnb-prop-types';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import omit from 'lodash/omit';
 
 import DayPickerRangeController from '../src/components/DayPickerRangeController';
@@ -77,7 +78,7 @@ const defaultProps = {
   renderDayContents: null,
   minimumNights: 1,
   isDayBlocked: () => false,
-  isOutsideRange: day => !isInclusivelyAfterDay(day, moment()),
+  isOutsideRange: (day) => !isInclusivelyAfterDay(day, moment()),
   isDayHighlighted: () => false,
   enableOutsideDays: false,
   daysViolatingMinNightsCanBeClicked: false,

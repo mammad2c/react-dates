@@ -1,5 +1,6 @@
 import React from 'react';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import { css, withStyles, withStylesPropTypes } from 'react-with-styles';
 import { Portal } from 'react-portal';
 import { forbidExtraProps } from 'airbnb-prop-types';
@@ -118,14 +119,14 @@ const defaultProps = {
   minimumNights: 1,
   enableOutsideDays: false,
   isDayBlocked: () => false,
-  isOutsideRange: (day) => !isInclusivelyAfterDay(day, moment()),
+  isOutsideRange: (day) => !isInclusivelyAfterDay(day, moment.locale() === 'fa' ? jMoment() : moment()),
   isDayHighlighted: () => false,
   minDate: undefined,
   maxDate: undefined,
 
   // internationalization
   displayFormat: () => moment.localeData().longDateFormat('L'),
-  monthFormat: 'MMMM YYYY',
+  monthFormat: moment.locale() === 'fa' ? 'jMMMM jYYYY' : 'MMMM YYYY',
   weekDayFormat: 'dd',
   phrases: DateRangePickerPhrases,
   dayAriaLabelFormat: undefined,
@@ -212,6 +213,8 @@ class DateRangePicker extends React.PureComponent {
       isDayPickerFocused: false,
       showKeyboardShortcuts: false,
     });
+
+    console.log('startDate: ', startDate.format('jYYYY/jMM/jDD'));
 
     onFocusChange(null);
     onClose({ startDate, endDate });
@@ -461,9 +464,8 @@ class DateRangePicker extends React.PureComponent {
     const onOutsideClick = (!withFullScreenPortal && withPortal)
       ? this.onOutsideClick
       : undefined;
-    const initialVisibleMonthThunk = initialVisibleMonth || (
-      () => (startDate || endDate || moment())
-    );
+
+    const initialVisibleMonthThunk = initialVisibleMonth || (() => (startDate || endDate || (moment.locale() === 'fa' ? jMoment() : moment())));
 
     const closeIcon = customCloseIcon || (
       <CloseButton {...css(styles.DateRangePicker_closeButton_svg)} />

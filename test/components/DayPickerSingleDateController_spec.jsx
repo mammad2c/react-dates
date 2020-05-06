@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 
 import DayPicker from '../../src/components/DayPicker';
 import DayPickerSingleDateController from '../../src/components/DayPickerSingleDateController';
@@ -15,8 +16,9 @@ import getVisibleDays from '../../src/utils/getVisibleDays';
 
 import { VERTICAL_SCROLLABLE } from '../../src/constants';
 
+const isFa = moment.locale() === 'fa';
 // Set to noon to mimic how days in the picker are configured internally
-const today = moment().startOf('day').hours(12);
+const today = isFa ? jMoment().startOf('day').hours(12) : moment().startOf('day').hours(12);
 
 function getCallsByModifier(stub, modifier) {
   return stub.getCalls().filter((call) => call.args[call.args.length - 1] === modifier);
@@ -708,7 +710,7 @@ describe('DayPickerSingleDateController', () => {
       wrapper.setState({
         currentMonth: today,
       });
-      const newMonth = moment().subtract(1, 'month');
+      const newMonth = isFa ? jMoment().subtract(1, 'jMonth') : moment().subtract(1, 'month');
       wrapper.instance().onPrevMonthClick();
       const visibleDays = Object.keys(wrapper.state().visibleDays);
       expect(visibleDays).to.include(toISOMonthString(newMonth));
@@ -756,7 +758,7 @@ describe('DayPickerSingleDateController', () => {
       wrapper.setState({
         currentMonth: today,
       });
-      const newMonth = moment().subtract(1, 'month');
+      const newMonth = isFa ? jMoment().subtract(1, 'jMonth') : moment().subtract(1, 'month');
       wrapper.instance().onPrevMonthClick();
       expect(onPrevMonthClickStub.callCount).to.equal(1);
       expect(onPrevMonthClickStub.firstCall.args[0].year()).to.equal(newMonth.year());
@@ -818,7 +820,7 @@ describe('DayPickerSingleDateController', () => {
           onDatesChange={sinon.stub()}
           onFocusChange={sinon.stub()}
           numberOfMonths={numberOfMonths}
-          minDate={today.clone().subtract(1, 'month')}
+          minDate={today.clone().subtract(1, isFa ? 'jMonth' : 'month')}
         />
       ));
       wrapper.setState({
@@ -842,7 +844,11 @@ describe('DayPickerSingleDateController', () => {
         currentMonth: today,
       });
       wrapper.instance().onNextMonthClick();
-      expect(wrapper.state().currentMonth.month()).to.equal(today.clone().add(1, 'month').month());
+      if (isFa) {
+        expect(wrapper.state().currentMonth.jMonth()).to.equal(today.clone().add(1, 'jMonth').jMonth());
+      } else {
+        expect(wrapper.state().currentMonth.month()).to.equal(today.clone().add(1, 'month').month());
+      }
     });
 
     it('new visibleDays has next month', () => {
@@ -857,7 +863,7 @@ describe('DayPickerSingleDateController', () => {
       wrapper.setState({
         currentMonth: today,
       });
-      const newMonth = moment().add(numberOfMonths + 1, 'months');
+      const newMonth = isFa ? jMoment().add(numberOfMonths + 1, 'jMonth') : moment().add(numberOfMonths + 1, 'months');
       wrapper.instance().onNextMonthClick();
       const visibleDays = Object.keys(wrapper.state().visibleDays);
       expect(visibleDays).to.include(toISOMonthString(newMonth));
@@ -876,7 +882,7 @@ describe('DayPickerSingleDateController', () => {
       });
       wrapper.instance().onNextMonthClick();
       const visibleDays = Object.keys(wrapper.state().visibleDays);
-      expect(visibleDays).to.not.include(toISOMonthString(today.clone().subtract(1, 'month')));
+      expect(visibleDays).to.not.include(toISOMonthString(today.clone().subtract(1, isFa ? 'jMonth' : 'month')));
     });
 
     it('calls this.getModifiers', () => {
@@ -904,11 +910,16 @@ describe('DayPickerSingleDateController', () => {
       wrapper.setState({
         currentMonth: today,
       });
-      const newMonth = moment().add(1, 'month');
+      const newMonth = isFa ? jMoment().add(1, 'jMonth') : moment().add(1, 'month');
       wrapper.instance().onNextMonthClick();
       expect(onNextMonthClickStub.callCount).to.equal(1);
-      expect(onNextMonthClickStub.firstCall.args[0].year()).to.equal(newMonth.year());
-      expect(onNextMonthClickStub.firstCall.args[0].month()).to.equal(newMonth.month());
+      if (isFa) {
+        expect(onNextMonthClickStub.firstCall.args[0].jYear()).to.equal(newMonth.jYear());
+        expect(onNextMonthClickStub.firstCall.args[0].jMonth()).to.equal(newMonth.jMonth());
+      } else {
+        expect(onNextMonthClickStub.firstCall.args[0].year()).to.equal(newMonth.year());
+        expect(onNextMonthClickStub.firstCall.args[0].month()).to.equal(newMonth.month());
+      }
     });
   });
 

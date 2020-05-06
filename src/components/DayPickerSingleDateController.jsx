@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import momentPropTypes from 'react-moment-proptypes';
 import { forbidExtraProps, mutuallyExclusiveProps, nonNegativeInteger } from 'airbnb-prop-types';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import values from 'object.values';
 import isTouchDevice from 'is-touch-device';
 
@@ -174,7 +175,7 @@ export default class DayPickerSingleDateController extends React.PureComponent {
     super(props);
 
     this.isTouchDevice = false;
-    this.today = moment();
+    this.today = moment.locale() === 'fa' ? jMoment() : moment();
 
     this.modifiers = {
       today: (day) => this.isToday(day),
@@ -327,7 +328,7 @@ export default class DayPickerSingleDateController extends React.PureComponent {
       });
     }
 
-    const today = moment();
+    const today = moment.locale() === 'fa' ? jMoment() : moment();
     if (!isSameDay(this.today, today)) {
       modifiers = this.deleteModifier(modifiers, this.today, 'today');
       modifiers = this.addModifier(modifiers, today, 'today');
@@ -345,7 +346,7 @@ export default class DayPickerSingleDateController extends React.PureComponent {
   }
 
   componentWillUpdate() {
-    this.today = moment();
+    this.today = moment.locale() === 'fa' ? jMoment() : moment();
   }
 
   onDayClick(day, e) {

@@ -1,10 +1,13 @@
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import { expect } from 'chai';
 
 import isSameDay from '../../src/utils/isSameDay';
 import getCalendarMonthWeeks from '../../src/utils/getCalendarMonthWeeks';
 
-const today = moment();
+const isFa = moment.locale() === 'fa';
+
+const today = isFa ? jMoment() : moment();
 const weeks = getCalendarMonthWeeks(today);
 const weeksWithOutsideDays = getCalendarMonthWeeks(today, true);
 
@@ -72,25 +75,45 @@ describe('getCalendarMonthWeeks', () => {
     let weeksWithPadding;
 
     beforeEach(() => {
-      // using specific month Feb 2017 to manually compare with calendar
-      weeksWithPadding = getCalendarMonthWeeks(moment('2017-02-01'), false);
+      // using specific month 1 Bahman 1395 or Feb 2017 to manually compare with calendar and
+      weeksWithPadding = getCalendarMonthWeeks(isFa ? jMoment('1395/11/01', 'jYYYY/jMM/jDD') : moment('2017-02-01'), false);
     });
 
     it('null pads leading days', () => {
       const firstWeek = weeksWithPadding[0];
-      expect(firstWeek[0]).to.equal(null); // Sun Jan 29
-      expect(firstWeek[1]).to.equal(null); // Mon Jan 30
-      expect(firstWeek[2]).to.equal(null); // Tue Jan 31
-      expect(firstWeek[3]).to.not.equal(null); // Wed Feb 1
+      if (isFa) {
+        expect(firstWeek[0]).to.equal(null); // Shanbe 25 Dey
+        expect(firstWeek[1]).to.equal(null); // Yek-shanbe 26 Dey
+        expect(firstWeek[2]).to.equal(null); // Do-shanbe 27 Dey
+        expect(firstWeek[3]).to.equal(null); // Se-shanbe 28 Dey
+        expect(firstWeek[4]).to.equal(null); // Chahar-shanbe 29 Dey
+        expect(firstWeek[5]).to.equal(null); // Panj-shanbe 30 Dey
+        expect(firstWeek[6]).to.not.equal(null); // Jome 1 Bahman
+      } else {
+        expect(firstWeek[0]).to.equal(null); // Sun Jan 29
+        expect(firstWeek[1]).to.equal(null); // Mon Jan 30
+        expect(firstWeek[2]).to.equal(null); // Tue Jan 31
+        expect(firstWeek[3]).to.not.equal(null); // Wed Feb 1
+      }
     });
 
     it('null pads trailing days', () => {
       const lastWeek = weeksWithPadding[weeksWithPadding.length - 1];
-      expect(lastWeek[2]).to.not.equal(null); // Tue Feb 28
-      expect(lastWeek[3]).to.equal(null); // Wed Mar 1
-      expect(lastWeek[4]).to.equal(null); // Thu Mar 2
-      expect(lastWeek[5]).to.equal(null); // Fri Mar 3
-      expect(lastWeek[6]).to.equal(null); // Sat Mar 4
+      if (isFa) {
+        expect(lastWeek[0]).to.not.equal(null); // Shanbe 30 Bahman
+        expect(lastWeek[1]).to.equal(null); // Yek-shanbe 1 Esfand
+        expect(lastWeek[2]).to.equal(null); // Do-shanbe 2 Esfand
+        expect(lastWeek[3]).to.equal(null); // Se-shanbe 3 Esfand
+        expect(lastWeek[4]).to.equal(null); // Chahar-shanbe 4 Esfand
+        expect(lastWeek[5]).to.equal(null); // Panj-shanbe 5 Esfand
+        expect(lastWeek[6]).to.equal(null); // Jome 6 Esfand
+      } else {
+        expect(lastWeek[2]).to.not.equal(null); // Tue Feb 28
+        expect(lastWeek[3]).to.equal(null); // Wed Mar 1
+        expect(lastWeek[4]).to.equal(null); // Thu Mar 2
+        expect(lastWeek[5]).to.equal(null); // Fri Mar 3
+        expect(lastWeek[6]).to.equal(null); // Sat Mar 4
+      }
     });
   });
 
@@ -120,13 +143,13 @@ describe('getCalendarMonthWeeks', () => {
 
   describe('enableOutsideDays arg is false', () => {
     it('first non-null element is first of the month', () => {
-      const firstOfMonth = today.clone().startOf('month');
+      const firstOfMonth = today.clone().startOf(isFa ? 'jMonth' : 'month');
       const firstNonNullDay = weeks[0].filter((day) => day)[0];
       expect(firstOfMonth.isSame(firstNonNullDay, 'day')).to.equal(true);
     });
 
     it('last non-null element is last of the month', () => {
-      const lastOfMonth = today.clone().endOf('month');
+      const lastOfMonth = today.clone().endOf(isFa ? 'jMonth' : 'month');
       const lastWeek = weeks[weeks.length - 1].filter((day) => day);
       const lastNonNullDay = lastWeek[lastWeek.length - 1];
       expect(lastOfMonth.isSame(lastNonNullDay, 'day')).to.equal(true);
@@ -140,14 +163,14 @@ describe('getCalendarMonthWeeks', () => {
 
   describe('enableOutsideDays arg is true', () => {
     it('contains first of the month', () => {
-      const firstOfMonth = today.clone().startOf('month');
+      const firstOfMonth = today.clone().startOf(isFa ? 'jMonth' : 'month');
       const containsFirstOfMonth = weeksWithOutsideDays[0]
         .filter((day) => firstOfMonth.isSame(day, 'day')).length > 0;
       expect(containsFirstOfMonth).to.equal(true);
     });
 
     it('last week contains last of the month', () => {
-      const lastOfMonth = today.clone().endOf('month');
+      const lastOfMonth = today.clone().endOf(isFa ? 'jMonth' : 'month');
       const containsLastOfMonth = weeks[weeksWithOutsideDays.length - 1]
         .filter((day) => lastOfMonth.isSame(day, 'day')).length > 0;
       expect(containsLastOfMonth).to.equal(true);
@@ -155,7 +178,7 @@ describe('getCalendarMonthWeeks', () => {
 
     it('last week contains last of the month if next month begins on Sunday', () => {
       const december2016 = moment('2016-12-01');
-      const lastOfMonth = december2016.clone().endOf('month');
+      const lastOfMonth = december2016.clone().endOf(isFa ? 'jMonth' : 'month');
       const weeksInDecember = getCalendarMonthWeeks(december2016);
       const containsLastOfMonth = weeksInDecember[weeksInDecember.length - 1]
         .filter((day) => lastOfMonth.isSame(day, 'day')).length > 0;
@@ -165,7 +188,7 @@ describe('getCalendarMonthWeeks', () => {
     it('last week contains last of the month if next month begins on Monday', () => {
       moment.locale('es');
       const april2017 = moment('2017-04-01');
-      const lastOfMonth = april2017.clone().endOf('month');
+      const lastOfMonth = april2017.clone().endOf(isFa ? 'jMonth' : 'month');
       const weeksInApril = getCalendarMonthWeeks(april2017);
       const containsLastOfMonth = weeksInApril[weeksInApril.length - 1]
         .filter((day) => lastOfMonth.isSame(day, 'day')).length > 0;
@@ -174,7 +197,7 @@ describe('getCalendarMonthWeeks', () => {
 
     it('last week contains last of the month if next month begins on Saturday', () => {
       const september2016 = moment('2016-09-01');
-      const lastOfMonth = september2016.clone().endOf('month');
+      const lastOfMonth = september2016.clone().endOf(isFa ? 'jMonth' : 'month');
       const weeksInSeptember = getCalendarMonthWeeks(september2016);
       const containsLastOfMonth = weeksInSeptember[weeksInSeptember.length - 1]
         .filter((day) => lastOfMonth.isSame(day, 'day')).length > 0;

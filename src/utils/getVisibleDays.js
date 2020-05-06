@@ -1,4 +1,5 @@
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import toISOMonthString from './toISOMonthString';
 
 export default function getVisibleDays(
@@ -7,17 +8,20 @@ export default function getVisibleDays(
   enableOutsideDays,
   withoutTransitionMonths,
 ) {
-  if (!moment.isMoment(month)) return {};
-
+  if (moment.locale() === 'fa') {
+    if (!jMoment.isMoment(month)) return {};
+  } else if (!moment.isMoment(month)) return {};
+  const format = (moment.locale() === 'fa') ? 'jMonth' : 'month';
   const visibleDaysByMonth = {};
-  let currentMonth = withoutTransitionMonths ? month.clone() : month.clone().subtract(1, 'month');
+  let currentMonth = withoutTransitionMonths ? month.clone() : month.clone().subtract(1, format);
+
   for (let i = 0; i < (withoutTransitionMonths ? numberOfMonths : numberOfMonths + 2); i += 1) {
     const visibleDays = [];
 
     // set utc offset to get correct dates in future (when timezone changes)
     const baseDate = currentMonth.clone();
-    const firstOfMonth = baseDate.clone().startOf('month').hour(12);
-    const lastOfMonth = baseDate.clone().endOf('month').hour(12);
+    const firstOfMonth = baseDate.clone().startOf(format).hour(12);
+    const lastOfMonth = baseDate.clone().endOf(format).hour(12);
 
     const currentDay = firstOfMonth.clone();
 
@@ -47,7 +51,7 @@ export default function getVisibleDays(
     }
 
     visibleDaysByMonth[toISOMonthString(currentMonth)] = visibleDays;
-    currentMonth = currentMonth.clone().add(1, 'month');
+    currentMonth = currentMonth.clone().add(1, format);
   }
 
   return visibleDaysByMonth;

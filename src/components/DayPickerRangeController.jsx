@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import momentPropTypes from 'react-moment-proptypes';
 import { forbidExtraProps, mutuallyExclusiveProps, nonNegativeInteger } from 'airbnb-prop-types';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import values from 'object.values';
 import isTouchDevice from 'is-touch-device';
 
@@ -42,7 +43,7 @@ import {
 } from '../constants';
 
 import DayPicker from './DayPicker';
-import getPooledMoment from '../utils/getPooledMoment';
+// import getPooledMoment from '../utils/getPooledMoment';
 
 const propTypes = forbidExtraProps({
   startDate: momentPropTypes.momentObj,
@@ -189,7 +190,7 @@ const defaultProps = {
   onShiftTab() {},
 
   // i18n
-  monthFormat: 'MMMM YYYY',
+  monthFormat: moment.locale() === 'fa' ? 'jMMMM jYYYY' : 'MMMM YYYY',
   weekDayFormat: 'dd',
   phrases: DayPickerPhrases,
   dayAriaLabelFormat: undefined,
@@ -212,7 +213,7 @@ export default class DayPickerRangeController extends React.PureComponent {
     super(props);
 
     this.isTouchDevice = isTouchDevice();
-    this.today = moment();
+    this.today = moment.locale() === 'fa' ? jMoment() : moment();
     this.modifiers = {
       today: (day) => this.isToday(day),
       blocked: (day) => this.isBlocked(day),
@@ -370,7 +371,7 @@ export default class DayPickerRangeController extends React.PureComponent {
 
         values(visibleDays).forEach((days) => {
           Object.keys(days).forEach((day) => {
-            const momentObj = moment(day);
+            const momentObj = moment.locale() === 'fa' ? jMoment(day) : moment(day);
             modifiers = this.deleteModifier(modifiers, momentObj, 'no-selected-start-before-selected-end');
           });
         });
@@ -423,7 +424,7 @@ export default class DayPickerRangeController extends React.PureComponent {
       if (!startDate && endDate) {
         values(visibleDays).forEach((days) => {
           Object.keys(days).forEach((day) => {
-            const momentObj = moment(day);
+            const momentObj = moment.locale() === 'fa' ? jMoment(day) : moment(day);
 
             if (isBeforeDay(momentObj, endDate)) {
               modifiers = this.addModifier(modifiers, momentObj, 'no-selected-start-before-selected-end');
@@ -467,7 +468,7 @@ export default class DayPickerRangeController extends React.PureComponent {
     if (didFocusChange || recomputePropModifiers) {
       values(visibleDays).forEach((days) => {
         Object.keys(days).forEach((day) => {
-          const momentObj = getPooledMoment(day);
+          const momentObj = moment.locale() === 'fa' ? jMoment(day) : moment(day);
           let isBlocked = false;
 
           if (didFocusChange || recomputeOutsideRange) {
@@ -554,7 +555,7 @@ export default class DayPickerRangeController extends React.PureComponent {
       );
     }
 
-    const today = moment();
+    const today = moment.locale() === 'fa' ? jMoment() : moment();
     if (!isSameDay(this.today, today)) {
       modifiers = this.deleteModifier(modifiers, this.today, 'today');
       modifiers = this.addModifier(modifiers, today, 'today');
@@ -923,9 +924,13 @@ export default class DayPickerRangeController extends React.PureComponent {
       newVisibleDays[month] = visibleDays[month];
     });
 
-    const prevMonth = currentMonth.clone().subtract(2, 'months');
-    const prevMonthVisibleDays = getVisibleDays(prevMonth, 1, enableOutsideDays, true);
-
+    const prevMonth = currentMonth.clone().subtract(1, moment.locale() === 'fa' ? 'jMonth' : 'month');
+    console.log('-----------------------------------------------')
+    // console.log('newVisibleDays: ', newVisibleDays);
+    // console.log('currentMonth: ', currentMonth.format('jYYYY/jMM/jDD'));
+    // console.log('prevMonth: ', prevMonth.format('jYYYY/jMM/jDD'));
+    console.log('-----------------------------------------------')
+    const prevMonthVisibleDays = getVisibleDays(prevMonth, numberOfMonths + 1, enableOutsideDays, true);
     const newCurrentMonth = currentMonth.clone().subtract(1, 'month');
     this.setState({
       currentMonth: newCurrentMonth,
@@ -949,15 +954,15 @@ export default class DayPickerRangeController extends React.PureComponent {
       onNextMonthClick,
     } = this.props;
     const { currentMonth, visibleDays } = this.state;
-
+    const formatM = moment.locale() === 'fa' ? 'jMonth' : 'month';
     const newVisibleDays = {};
     Object.keys(visibleDays).sort().slice(1).forEach((month) => {
       newVisibleDays[month] = visibleDays[month];
     });
 
-    const nextMonth = currentMonth.clone().add(numberOfMonths + 1, 'month');
+    const nextMonth = currentMonth.clone().add(numberOfMonths + 1, formatM);
     const nextMonthVisibleDays = getVisibleDays(nextMonth, 1, enableOutsideDays, true);
-    const newCurrentMonth = currentMonth.clone().add(1, 'month');
+    const newCurrentMonth = currentMonth.clone().add(1, formatM);
     this.setState({
       currentMonth: newCurrentMonth,
       disablePrev: this.shouldDisableMonthNavigation(minDate, newCurrentMonth),
@@ -1046,7 +1051,9 @@ export default class DayPickerRangeController extends React.PureComponent {
       numberOfMonths,
     } = this.props;
 
-    let focusedDate = newMonth.clone().startOf('month');
+    const formatM = moment.locale() === 'fa' ? 'jMonth' : 'month';
+
+    let focusedDate = newMonth.clone().startOf(formatM);
     if (focusedInput === START_DATE && startDate) {
       focusedDate = startDate.clone();
     } else if (focusedInput === END_DATE && !endDate && startDate) {
@@ -1057,7 +1064,7 @@ export default class DayPickerRangeController extends React.PureComponent {
 
     if (this.isBlocked(focusedDate)) {
       const days = [];
-      const lastVisibleDay = newMonth.clone().add(numberOfMonths - 1, 'months').endOf('month');
+      const lastVisibleDay = newMonth.clone().add(numberOfMonths - 1, moment.locale() === 'fa' ? 'jMonth' : 'months').endOf(formatM);
       let currentDay = focusedDate.clone();
       while (!isAfterDay(currentDay, lastVisibleDay)) {
         currentDay = currentDay.clone().add(1, 'day');
@@ -1168,6 +1175,7 @@ export default class DayPickerRangeController extends React.PureComponent {
       const dayDiff = day.diff(startDate.clone().startOf('day').hour(12), 'days');
       return dayDiff < minimumNights && dayDiff >= 0;
     }
+    if (moment.locale() === 'fa') return isOutsideRange(jMoment(day).subtract(minimumNights, 'days'));
     return isOutsideRange(moment(day).subtract(minimumNights, 'days'));
   }
 
@@ -1337,6 +1345,8 @@ export default class DayPickerRangeController extends React.PureComponent {
       disablePrev,
       disableNext,
     } = this.state;
+
+    // console.log(visibleDays);
 
     return (
       <DayPicker

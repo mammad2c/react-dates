@@ -1,6 +1,7 @@
 import React from 'react';
 import { expect } from 'chai';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import sinon from 'sinon-sandbox';
 import { shallow } from 'enzyme';
 
@@ -20,6 +21,8 @@ import {
 const today = moment().startOf('day').hours(12);
 
 describe('DateRangePickerInputController', () => {
+  const isFa = moment.locale() === 'fa';
+
   describe('#render', () => {
     it('renders a DateRangePickerInput', () => {
       const wrapper = shallow(<DateRangePickerInputController />);
@@ -128,7 +131,7 @@ describe('DateRangePickerInputController', () => {
 
   describe('#onEndDateChange', () => {
     describe('is a valid end date', () => {
-      const validFutureDateString = moment(today).add(10, 'days').format('YYYY-MM-DD');
+      const validFutureDateString = isFa ? jMoment(today).add(10, 'days').format('jYYYY/jMM/jDD') : moment(today).add(10, 'days').format('YYYY-MM-DD');
       describe('when props.startDate is not provided', () => {
         it('calls props.onDatesChange with provided end date', () => {
           const onDatesChangeStub = sinon.stub();
@@ -140,7 +143,9 @@ describe('DateRangePickerInputController', () => {
 
           const [{ startDate, endDate }] = onDatesChangeStub.getCall(0).args;
           expect(startDate).to.equal(wrapper.props().startDate);
-          expect(isSameDay(endDate, moment(validFutureDateString))).to.equal(true);
+          expect(isSameDay(endDate, isFa
+            ? jMoment(validFutureDateString, 'jYYYY/jMM/jDD')
+            : moment(validFutureDateString))).to.equal(true);
         });
 
         describe('props.onFocusChange', () => {
@@ -217,7 +222,7 @@ describe('DateRangePickerInputController', () => {
           expect(onDatesChangeStub.callCount).to.equal(1);
 
           const onDatesChangeArgs = onDatesChangeStub.getCall(0).args[0];
-          const futureDate = moment(validFutureDateString);
+          const futureDate = isFa ? jMoment(validFutureDateString, 'jYYYY/jMM/jDD') : moment(validFutureDateString);
           expect(onDatesChangeArgs.startDate).to.equal(startDate);
           expect(isSameDay(onDatesChangeArgs.endDate, futureDate)).to.equal(true);
         });
@@ -260,7 +265,7 @@ describe('DateRangePickerInputController', () => {
             expect(onDatesChangeStub.callCount).to.equal(1);
 
             const onDatesChangeArgs = onDatesChangeStub.getCall(0).args[0];
-            const futureDate = moment(validFutureDateString);
+            const futureDate = isFa ? jMoment(validFutureDateString, 'jYYYY/jMM/jDD') : moment(validFutureDateString);
             expect(onDatesChangeArgs.startDate).to.equal(startDate);
             expect(isSameDay(onDatesChangeArgs.endDate, futureDate)).to.equal(true);
           });
@@ -308,8 +313,8 @@ describe('DateRangePickerInputController', () => {
     });
 
     describe('matches custom display format', () => {
-      const customFormat = 'YY|MM[foobar]DD';
-      const customFormatDateString = moment(today).add(5, 'days').format(customFormat);
+      const customFormat = isFa ? 'jYY jMM jDD' : 'YY|MM[foobar]DD';
+      const customFormatDateString = isFa ? jMoment(today).add(5, 'days').format(customFormat) : moment(today).add(5, 'days').format(customFormat);
       it('calls props.onDatesChange with correct arguments', () => {
         const onDatesChangeStub = sinon.stub();
         const wrapper = shallow((
@@ -670,8 +675,8 @@ describe('DateRangePickerInputController', () => {
     });
 
     describe('matches custom display format', () => {
-      const customFormat = 'YY|MM[foobar]DD';
-      const customFormatDateString = moment(today).add(5, 'days').format(customFormat);
+      const customFormat = isFa ? 'jYY jMM jDD' : 'YY|MM[foobar]DD';
+      const customFormatDateString = isFa ? jMoment(today).add(5, 'days').format(customFormat) : moment(today).add(5, 'days').format(customFormat);
       it('calls props.onDatesChange with correct arguments', () => {
         const onDatesChangeStub = sinon.stub();
         const wrapper = shallow((

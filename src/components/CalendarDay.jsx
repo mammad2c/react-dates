@@ -4,6 +4,7 @@ import momentPropTypes from 'react-moment-proptypes';
 import { forbidExtraProps, nonNegativeInteger } from 'airbnb-prop-types';
 import { css, withStyles, withStylesPropTypes } from 'react-with-styles';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import raf from 'raf';
 
 import { CalendarDayPhrases } from '../defaultPhrases';
@@ -32,7 +33,7 @@ const propTypes = forbidExtraProps({
 });
 
 const defaultProps = {
-  day: moment(),
+  day: moment.locale() === 'fa' ? jMoment() : moment(),
   daySize: DAY_SIZE,
   isOutsideDay: false,
   modifiers: new Set(),
@@ -120,6 +121,10 @@ class CalendarDay extends React.PureComponent {
       ariaLabel,
     } = getCalendarDaySettings(day, ariaLabelFormat, daySize, modifiers, phrases);
 
+    // if (day.jMonth() === 11 && day.jDate() === 1) {
+    //   console.log('isOutSideRange: ', isOutsideRange);
+    // }
+
     return (
       <td
         {...css(
@@ -162,7 +167,7 @@ class CalendarDay extends React.PureComponent {
         onKeyDown={(e) => { this.onKeyDown(day, e); }}
         tabIndex={tabIndex}
       >
-        {renderDayContents ? renderDayContents(day, modifiers) : day.format('D')}
+        {renderDayContents ? renderDayContents(day, modifiers) : moment.locale() === 'fa' ? day.format('jD') : day.format('D')}
       </td>
     );
   }

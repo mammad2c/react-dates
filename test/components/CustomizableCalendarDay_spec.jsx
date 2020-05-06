@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import sinon from 'sinon-sandbox';
 import { shallow } from 'enzyme';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import raf from 'raf';
 
 import { BLOCKED_MODIFIER } from '../../src/constants';
@@ -27,15 +28,24 @@ describe('CustomizableCalendarDay', () => {
     });
 
     it('contains arbitrary content if renderDay is provided', () => {
-      const dayName = moment().format('dddd');
-      const renderDay = (day) => day.format('dddd');
+      const isFa = moment.locale() === 'fa';
+      const dayName = isFa ? jMoment().format('dddd') : moment().format('dddd');
+      const renderDay = (day) => (isFa
+        ? jMoment(`${day.year()}/${day.month() + 1}/${day.date()}`, 'YYYY/MM/DD').format('dddd')
+        : day.format('dddd'));
       const wrapper = shallow(<CustomizableCalendarDay renderDayContents={renderDay} />).dive();
       expect(wrapper.text()).to.equal(dayName);
     });
 
     it('passes modifiers to renderDay', () => {
+      const isFa = moment.locale() === 'fa';
       const modifiers = new Set([BLOCKED_MODIFIER]);
-      const renderDay = (day, mods) => `${day.format('dddd')}${mods.has(BLOCKED_MODIFIER) ? 'BLOCKED' : ''}`;
+      const renderDay = (day, mods) => {
+        const endStr = mods.has(BLOCKED_MODIFIER) ? 'BLOCKED' : '';
+        return (isFa
+          ? `${jMoment(`${day.year()}/${day.month() + 1}/${day.date()}`, 'YYYY/MM/DD').format('dddd')}${endStr}`
+          : `${day.format('dddd')}${endStr}`);
+      };
       const expected = `${moment().format('dddd')}BLOCKED`;
       const wrapper = shallow(<CustomizableCalendarDay
         renderDayContents={renderDay}
@@ -148,7 +158,7 @@ describe('CustomizableCalendarDay', () => {
           />
         )).dive();
 
-        expect(wrapper.prop('aria-label')).to.equal('October 10th 2017');
+        expect(wrapper.prop('aria-label')).to.equal('اکتبر 10م 2017');
       });
     });
 

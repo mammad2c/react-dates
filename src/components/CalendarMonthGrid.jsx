@@ -4,6 +4,8 @@ import momentPropTypes from 'react-moment-proptypes';
 import { forbidExtraProps, mutuallyExclusiveProps, nonNegativeInteger } from 'airbnb-prop-types';
 import { css, withStyles, withStylesPropTypes } from 'react-with-styles';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
+
 import { addEventListener } from 'consolidated-events';
 
 import { CalendarDayPhrases } from '../defaultPhrases';
@@ -71,7 +73,7 @@ const defaultProps = {
   enableOutsideDays: false,
   firstVisibleMonthIndex: 0,
   horizontalMonthPadding: 13,
-  initialMonth: moment(),
+  initialMonth: moment.locale() === 'fa' ? jMoment() : moment(),
   isAnimating: false,
   numberOfMonths: 1,
   modifiers: {},
@@ -97,14 +99,16 @@ const defaultProps = {
   verticalBorderSpacing: undefined,
 
   // i18n
-  monthFormat: 'MMMM YYYY', // english locale
+  monthFormat: moment.locale() === 'fa' ? 'jMMMM jYYYY' : 'MMMM YYYY', // english locale
   phrases: CalendarDayPhrases,
   dayAriaLabelFormat: undefined,
 };
 
 function getMonths(initialMonth, numberOfMonths, withoutTransitionMonths) {
+  const isFa = moment.locale() === 'fa';
+  const format = isFa ? 'jMonth' : 'month';
   let month = initialMonth.clone();
-  if (!withoutTransitionMonths) month = month.subtract(1, 'month');
+  if (!withoutTransitionMonths) month = month.subtract(1, format);
 
   const months = [];
   for (let i = 0; i < (withoutTransitionMonths ? numberOfMonths : numberOfMonths + 2); i += 1) {
@@ -143,22 +147,22 @@ class CalendarMonthGrid extends React.PureComponent {
   componentWillReceiveProps(nextProps) {
     const { initialMonth, numberOfMonths, orientation } = nextProps;
     const { months } = this.state;
-
+    const format = moment.locale() === 'fa' ? 'jMonth' : 'month';
     const {
       initialMonth: prevInitialMonth,
       numberOfMonths: prevNumberOfMonths,
     } = this.props;
-    const hasMonthChanged = !prevInitialMonth.isSame(initialMonth, 'month');
+    const hasMonthChanged = !prevInitialMonth.isSame(initialMonth, format);
     const hasNumberOfMonthsChanged = prevNumberOfMonths !== numberOfMonths;
     let newMonths = months;
 
     if (hasMonthChanged && !hasNumberOfMonthsChanged) {
       if (isNextMonth(prevInitialMonth, initialMonth)) {
         newMonths = months.slice(1);
-        newMonths.push(months[months.length - 1].clone().add(1, 'month'));
+        newMonths.push(months[months.length - 1].clone().add(1, format));
       } else if (isPrevMonth(prevInitialMonth, initialMonth)) {
         newMonths = months.slice(0, months.length - 1);
-        newMonths.unshift(months[0].clone().subtract(1, 'month'));
+        newMonths.unshift(months[0].clone().subtract(1, format));
       } else {
         const withoutTransitionMonths = orientation === VERTICAL_SCROLLABLE;
         newMonths = getMonths(initialMonth, numberOfMonths, withoutTransitionMonths);

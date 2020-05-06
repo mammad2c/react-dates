@@ -1,21 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import momentPropTypes from 'react-moment-proptypes';
-import moment from 'moment';
+import jMoment from 'moment-jalaali';
+
 import omit from 'lodash/omit';
 
 import DateRangePicker from '../src/components/DateRangePicker';
 
-import { DateRangePickerPhrases } from '../src/defaultPhrases';
 import DateRangePickerShape from '../src/shapes/DateRangePickerShape';
 import {
   START_DATE,
   END_DATE,
-  HORIZONTAL_ORIENTATION,
-  ANCHOR_LEFT,
-  NAV_POSITION_TOP,
 } from '../src/constants';
-import isInclusivelyAfterDay from '../src/utils/isInclusivelyAfterDay';
 
 const propTypes = {
   // example props for the demo
@@ -24,81 +20,29 @@ const propTypes = {
   stateDateWrapper: PropTypes.func,
   initialStartDate: momentPropTypes.momentObj,
   initialEndDate: momentPropTypes.momentObj,
-
-  ...omit(DateRangePickerShape, [
-    'startDate',
-    'endDate',
-    'onDatesChange',
-    'focusedInput',
-    'onFocusChange',
-  ]),
 };
 
 const defaultProps = {
-  // example props for the demo
-  autoFocus: false,
-  autoFocusEndDate: false,
-  initialStartDate: null,
-  initialEndDate: null,
-
   // input related props
   startDateId: START_DATE,
-  startDatePlaceholderText: 'Start Date',
+  focusedInput: START_DATE,
+  stateDateWrapper: date => date,
   endDateId: END_DATE,
-  endDatePlaceholderText: 'End Date',
-  disabled: false,
-  required: false,
-  screenReaderInputMessage: '',
-  showClearDates: false,
-  showDefaultInputIcon: false,
-  customInputIcon: null,
-  customArrowIcon: null,
-  customCloseIcon: null,
-  block: false,
-  small: false,
-  regular: false,
 
   // calendar presentation and interaction related props
-  renderMonthText: null,
-  orientation: HORIZONTAL_ORIENTATION,
-  anchorDirection: ANCHOR_LEFT,
-  horizontalMargin: 0,
-  withPortal: false,
-  withFullScreenPortal: false,
-  initialVisibleMonth: null,
-  numberOfMonths: 2,
-  keepOpenOnDateSelect: false,
-  reopenPickerOnClearDates: false,
-  isRTL: false,
+  numberOfMonths: 1,
+  isRTL: true,
 
-  // navigation related props
-  navPosition: NAV_POSITION_TOP,
-  navPrev: null,
-  navNext: null,
-  onPrevMonthClick() {},
-  onNextMonthClick() {},
-  onClose() {},
-
-  // day presentation and interaction related props
-  renderCalendarDay: undefined,
-  renderDayContents: null,
-  minimumNights: 1,
-  enableOutsideDays: false,
-  isDayBlocked: () => false,
-  isOutsideRange: day => !isInclusivelyAfterDay(day, moment()),
-  isDayHighlighted: () => false,
-
-  // internationalization
-  displayFormat: () => moment.localeData().longDateFormat('L'),
-  monthFormat: 'MMMM YYYY',
-  phrases: DateRangePickerPhrases,
-
-  stateDateWrapper: date => date,
 };
 
 class DateRangePickerWrapper extends React.Component {
   constructor(props) {
     super(props);
+    jMoment.locale('fa');
+    jMoment.loadPersian({
+      dialect: 'persian',
+      usePersianDigits: false,
+    });
 
     let focusedInput = null;
     if (props.autoFocus) {
@@ -142,7 +86,6 @@ class DateRangePickerWrapper extends React.Component {
       'initialEndDate',
       'stateDateWrapper',
     ]);
-
     return (
       <div>
         <DateRangePicker

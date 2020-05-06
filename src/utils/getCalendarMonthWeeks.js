@@ -14,9 +14,13 @@ export default function getCalendarMonthWeeks(
     throw new TypeError('`firstDayOfWeek` must be an integer between 0 and 6');
   }
 
+  const isFa = moment.locale() === 'fa';
+
+  const format = isFa ? 'jMonth' : 'month';
+
   // set utc offset to get correct dates in future (when timezone changes)
-  const firstOfMonth = month.clone().startOf('month').hour(12);
-  const lastOfMonth = month.clone().endOf('month').hour(12);
+  const firstOfMonth = month.clone().startOf(format).hour(12);
+  const lastOfMonth = month.clone().endOf(format).hour(12);
 
   // calculate the exact first and last days to fill the entire matrix
   // (considering days outside month)

@@ -11,6 +11,12 @@ const startCacheInsideDays = new Map();
 const endCacheInsideDays = new Map();
 
 export default function isDayVisible(day, month, numberOfMonths, enableOutsideDays) {
+  let formatM = 'month';
+  const formatW = 'week';
+  if (moment.locale() === 'fa') {
+    formatM = 'jMonth';
+  }
+
   if (!moment.isMoment(day)) return false;
 
   // Cloning is a little expensive, so we want to do it as little as possible.
@@ -21,7 +27,7 @@ export default function isDayVisible(day, month, numberOfMonths, enableOutsideDa
 
   if (enableOutsideDays) {
     if (!startCacheOutsideDays.has(startKey)) {
-      startCacheOutsideDays.set(startKey, month.clone().startOf('month').startOf('week'));
+      startCacheOutsideDays.set(startKey, month.clone().startOf(formatM).startOf(formatW));
     }
 
     if (isBeforeDay(day, startCacheOutsideDays.get(startKey))) return false;
@@ -29,8 +35,8 @@ export default function isDayVisible(day, month, numberOfMonths, enableOutsideDa
     if (!endCacheOutsideDays.has(endKey)) {
       endCacheOutsideDays.set(
         endKey,
-        month.clone().endOf('week').add(numberOfMonths - 1, 'months').endOf('month')
-          .endOf('week'),
+        month.clone().endOf(formatW).add(numberOfMonths - 1, moment.locale() === 'fa' ? 'jMonth' : 'months').endOf(formatM)
+          .endOf(formatW),
       );
     }
 
@@ -40,7 +46,7 @@ export default function isDayVisible(day, month, numberOfMonths, enableOutsideDa
   // !enableOutsideDays
 
   if (!startCacheInsideDays.has(startKey)) {
-    startCacheInsideDays.set(startKey, month.clone().startOf('month'));
+    startCacheInsideDays.set(startKey, month.clone().startOf(formatM));
   }
 
   if (isBeforeDay(day, startCacheInsideDays.get(startKey))) return false;
@@ -48,7 +54,7 @@ export default function isDayVisible(day, month, numberOfMonths, enableOutsideDa
   if (!endCacheInsideDays.has(endKey)) {
     endCacheInsideDays.set(
       endKey,
-      month.clone().add(numberOfMonths - 1, 'months').endOf('month'),
+      month.clone().add(numberOfMonths - 1, moment.locale() === 'fa' ? 'jMonth' : 'months').endOf(formatM),
     );
   }
 

@@ -88,7 +88,7 @@ storiesOf('DateRangePicker (DRP)', module)
   }))
   .add('non-english locale (Persian)', withInfo()(() => {
     moment.locale('fa');
-    momentJalaali.loadPersian({ dialect: 'persian-modern', usePersianDigits: true });
+    // momentJalaali.loadPersian({ dialect: 'persian-modern', usePersianDigits: true });
     return (
       <DateRangePickerWrapper
         isRTL

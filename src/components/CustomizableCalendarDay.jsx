@@ -4,6 +4,7 @@ import momentPropTypes from 'react-moment-proptypes';
 import { forbidExtraProps, nonNegativeInteger, or } from 'airbnb-prop-types';
 import { css, withStyles, withStylesPropTypes } from 'react-with-styles';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import raf from 'raf';
 
 import { CalendarDayPhrases } from '../defaultPhrases';
@@ -178,7 +179,7 @@ export const selectedStyles = {
 };
 
 const defaultProps = {
-  day: moment(),
+  day: moment.locale() === 'fa' ? jMoment() : moment(),
   daySize: DAY_SIZE,
   isOutsideDay: false,
   modifiers: new Set(),

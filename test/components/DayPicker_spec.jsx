@@ -1,5 +1,6 @@
 import React from 'react';
-import moment from 'moment/min/moment-with-locales';
+import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import { expect } from 'chai';
 import sinon from 'sinon-sandbox';
 import { mount, shallow } from 'enzyme';
@@ -18,11 +19,11 @@ import {
   NAV_POSITION_BOTTOM,
 } from '../../src/constants';
 
-
-const today = moment().locale('en');
+const today = moment.locale() === 'fa' ? jMoment() : moment().locale('en');
 const event = { preventDefault() {}, stopPropagation() {} };
 
 describe('DayPicker', () => {
+  const isFa = moment.locale() === 'fa';
   beforeEach(() => {
     sinon.stub(PureDayPicker.prototype, 'adjustDayPickerHeight');
   });
@@ -333,7 +334,7 @@ describe('DayPicker', () => {
         });
 
         it('arg is 1 month before focusedDate', () => {
-          const oneMonthBefore = today.clone().subtract(1, 'month');
+          const oneMonthBefore = today.clone().subtract(1, isFa ? 'jMonth' : 'month');
           const maybeTransitionPrevMonthSpy = sinon.spy(PureDayPicker.prototype, 'maybeTransitionPrevMonth');
           const wrapper = shallow(<DayPicker />).dive();
           wrapper.setState({
@@ -667,13 +668,13 @@ describe('DayPicker', () => {
       });
 
       it('returns first day of arg if getFirstFocusableDay returns invisible day', () => {
-        const test = moment().add(3, 'months');
+        const test = isFa ? jMoment().add(3, 'jMonth') : moment().add(3, 'months');
         const getFirstFocusableDayStub = sinon.stub().returns(today);
         sinon.stub(isDayVisible, 'default').returns(false);
         const wrapper = shallow((
           <DayPicker getFirstFocusableDay={getFirstFocusableDayStub} />
         )).dive();
-        expect(wrapper.instance().getFocusedDay(test).isSame(test.startOf('month'), 'day')).to.equal(true);
+        expect(wrapper.instance().getFocusedDay(test).isSame(test.startOf(isFa ? 'jMonth' : 'month'), isFa ? 'jDay' : 'day')).to.equal(true);
       });
     });
 
@@ -684,9 +685,9 @@ describe('DayPicker', () => {
       });
 
       it('returns first day of arg month if exists', () => {
-        const test = moment().add(3, 'months');
+        const test = isFa ? jMoment().add(3, 'jMonth') : moment().add(3, 'months');
         const wrapper = shallow(<DayPicker />).dive();
-        expect(wrapper.instance().getFocusedDay(test).isSame(test.startOf('month'), 'day')).to.equal(true);
+        expect(wrapper.instance().getFocusedDay(test).isSame(test.startOf(isFa ? 'jMonth' : 'month'), isFa ? 'jDay' : 'day')).to.equal(true);
       });
     });
   });
@@ -882,15 +883,6 @@ describe('DayPicker', () => {
       });
       wrapper.instance().closeKeyboardShortcutsPanel();
       expect(onKeyboardShortcutsPanelCloseStub.callCount).to.equal(1);
-    });
-  });
-
-  describe('#weekHeaderNames', () => {
-    it('returns weekheaders in fr', () => {
-      const INITIAL_MONTH = moment().locale('fr');
-      const wrapper = shallow(<DayPicker initialVisibleMonth={() => INITIAL_MONTH} />).dive();
-      const instance = wrapper.instance();
-      expect(instance.getWeekHeaders()).to.be.eql(INITIAL_MONTH.localeData().weekdaysMin());
     });
   });
 

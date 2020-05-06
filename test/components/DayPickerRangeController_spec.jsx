@@ -1,6 +1,7 @@
 import React from 'react';
 import { expect } from 'chai';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import sinon from 'sinon-sandbox';
 import { shallow } from 'enzyme';
 
@@ -19,8 +20,10 @@ import getVisibleDays from '../../src/utils/getVisibleDays';
 
 import { START_DATE, END_DATE, VERTICAL_SCROLLABLE } from '../../src/constants';
 
+const isFa = moment.locale() === 'fa';
+
 // Set to noon to mimic how days in the picker are configured internally
-const today = moment().startOf('day').hours(12);
+const today = isFa ? jMoment().startOf('day').hours(12) : moment().startOf('day').hours(12);
 
 function getCallsByModifier(stub, modifier) {
   return stub.getCalls().filter((call) => call.args[call.args.length - 1] === modifier);
@@ -809,7 +812,7 @@ describe('DayPickerRangeController', () => {
                 minimumNights={minimumNights}
               />);
               const { visibleDays } = wrapper.state();
-              let day = moment(today);
+              let day = isFa ? jMoment(today) : moment(today);
               for (let i = 0; i < minimumNights; i += 1) {
                 const monthString = toISOMonthString(day);
                 const dateString = toISODateString(day);
@@ -826,7 +829,7 @@ describe('DayPickerRangeController', () => {
               });
 
               const { visibleDays: newVisibleDays } = wrapper.state();
-              day = moment(today);
+              day = isFa ? jMoment(today) : moment(today);
               for (let i = 0; i < minimumNights; i += 1) {
                 const monthString = toISOMonthString(day);
                 const dateString = toISODateString(day);
@@ -875,7 +878,7 @@ describe('DayPickerRangeController', () => {
                 minimumNights,
               });
               const { visibleDays } = wrapper.state();
-              const day = moment(today);
+              const day = isFa ? jMoment(today) : moment(today);
               for (let i = 0; i < minimumNights; i += 1) {
                 const monthString = toISOMonthString(day);
                 const dateString = toISODateString(day);
@@ -899,7 +902,7 @@ describe('DayPickerRangeController', () => {
                 minimumNights,
               });
               const { visibleDays } = wrapper.state();
-              const day = moment(today);
+              const day = isFa ? jMoment(today) : moment(today);
               for (let i = 0; i < minimumNights; i += 1) {
                 const monthString = toISOMonthString(day);
                 const dateString = toISODateString(day);
@@ -3490,7 +3493,7 @@ describe('DayPickerRangeController', () => {
       wrapper.setState({
         currentMonth: today,
       });
-      const newMonth = moment().subtract(1, 'month');
+      const newMonth = isFa ? jMoment().subtract(1, 'jMonth') : moment().subtract(1, 'month');
       wrapper.instance().onPrevMonthClick();
       const visibleDays = Object.keys(wrapper.state().visibleDays);
       expect(visibleDays).to.include(toISOMonthString(newMonth));
@@ -3639,7 +3642,7 @@ describe('DayPickerRangeController', () => {
       wrapper.setState({
         currentMonth: today,
       });
-      const newMonth = moment().add(numberOfMonths + 1, 'months');
+      const newMonth = isFa ? jMoment().add(numberOfMonths + 1, 'jMonth') : moment().add(numberOfMonths + 1, 'months');
       wrapper.instance().onNextMonthClick();
       const visibleDays = Object.keys(wrapper.state().visibleDays);
       expect(visibleDays).to.include(toISOMonthString(newMonth));
@@ -3658,7 +3661,7 @@ describe('DayPickerRangeController', () => {
       });
       wrapper.instance().onNextMonthClick();
       const visibleDays = Object.keys(wrapper.state().visibleDays);
-      expect(visibleDays).to.not.include(toISOMonthString(today.clone().subtract(1, 'month')));
+      expect(visibleDays).to.not.include(toISOMonthString(today.clone().subtract(1, isFa ? 'jMonth' : 'month')));
     });
 
     it('calls this.getModifiers', () => {
@@ -3720,9 +3723,9 @@ describe('DayPickerRangeController', () => {
             onDatesChange={sinon.stub()}
           />
         ));
-        const startOfMonth = today.clone().startOf('month');
+        const startOfMonth = today.clone().startOf(isFa ? 'jMonth' : 'month');
         const firstFocusableDay = wrapper.instance().getFirstFocusableDay(today);
-        expect(firstFocusableDay.isSame(startOfMonth, 'day')).to.equal(true);
+        expect(firstFocusableDay.isSame(startOfMonth, isFa ? 'jDay' : 'day')).to.equal(true);
       });
     });
 
@@ -3772,7 +3775,7 @@ describe('DayPickerRangeController', () => {
           />
         ));
         const firstFocusableDay = wrapper.instance().getFirstFocusableDay(today);
-        expect(firstFocusableDay.isSame(today.clone().startOf('month'), 'day')).to.equal(true);
+        expect(firstFocusableDay.isSame(today.clone().startOf(isFa ? 'jMonth' : 'month'), isFa ? 'jDay' : 'day')).to.equal(true);
       });
     });
 
@@ -3780,7 +3783,7 @@ describe('DayPickerRangeController', () => {
       it('returns next unblocked visible day after desired day if exists', () => {
         const isBlockedStub = sinon.stub(DayPickerRangeController.prototype, 'isBlocked');
 
-        const startDate = moment().endOf('month').subtract(10, 'days');
+        const startDate = isFa ? jMoment().endOf('jMonth').subtract(10, 'days') : moment().endOf('month').subtract(10, 'days');
         const wrapper = shallow((
           <DayPickerRangeController
             focusedInput={END_DATE}
@@ -3819,7 +3822,7 @@ describe('DayPickerRangeController', () => {
       const getModifiersForDaySpy = sinon.spy(DayPickerRangeController.prototype, 'getModifiersForDay');
       const monthISO = toISOMonthString(today);
       const visibleDays = {
-        [monthISO]: [today, moment().add(1, 'day'), moment().add(2, 'days')],
+        [monthISO]: [today, isFa ? jMoment().add(1, 'day') : moment().add(1, 'day'), isFa ? jMoment().add(2, 'days') : moment().add(2, 'days')],
       };
       const wrapper = shallow((
         <DayPickerRangeController

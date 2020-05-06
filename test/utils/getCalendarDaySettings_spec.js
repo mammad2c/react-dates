@@ -1,12 +1,15 @@
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import { expect } from 'chai';
 import sinon from 'sinon-sandbox';
 
 import getCalendarDaySettings from '../../src/utils/getCalendarDaySettings';
 import { BLOCKED_MODIFIER } from '../../src/constants';
 
-const testDay = moment('10/10/2017', 'MM/DD/YYYY');
-const expectedFormattedDay = { date: 'Tuesday, October 10, 2017' };
+const isFa = moment.locale() === 'fa';
+
+const testDay = isFa ? jMoment('10/10/1395', 'jMM/jDD/jYYYY') : moment('10/10/2017', 'MM/DD/YYYY');
+const expectedFormattedDay = { date: isFa ? 'آدینه, 10 دی 1395' : 'Tuesday, October 10, 2017' };
 const testAriaLabelFormat = 'dddd, LL';
 const testDaySize = 39;
 const testModifiers = new Set();

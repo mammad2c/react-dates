@@ -4,6 +4,7 @@ import { forbidExtraProps, mutuallyExclusiveProps, nonNegativeInteger } from 'ai
 import { css, withStyles, withStylesPropTypes } from 'react-with-styles';
 
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import throttle from 'lodash/throttle';
 import isTouchDevice from 'is-touch-device';
 import OutsideClickHandler from 'react-outside-click-handler';
@@ -135,7 +136,7 @@ export const defaultProps = {
   withPortal: false,
   onOutsideClick() {},
   hidden: false,
-  initialVisibleMonth: () => moment(),
+  initialVisibleMonth: () => (moment.locale() === 'fa' ? jMoment() : moment()),
   firstDayOfWeek: null,
   renderCalendarInfo: null,
   calendarInfoPosition: INFO_POSITION_BOTTOM,
@@ -191,7 +192,7 @@ export const defaultProps = {
   onShiftTab() {},
 
   // internationalization
-  monthFormat: 'MMMM YYYY',
+  monthFormat: moment.locale() === 'fa' ? 'jMMMM jYYYY' : 'MMMM YYYY',
   weekDayFormat: 'dd',
   phrases: DayPickerPhrases,
   dayAriaLabelFormat: undefined,
@@ -201,9 +202,17 @@ class DayPicker extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    const currentMonth = props.hidden ? moment() : props.initialVisibleMonth();
+    let currentMonth;
+    let format;
+    if (moment.locale() === 'fa') {
+      currentMonth = props.hidden ? jMoment() : props.initialVisibleMonth();
+      format = 'jMonth';
+    } else {
+      currentMonth = props.hidden ? moment() : props.initialVisibleMonth();
+      format = 'month';
+    }
 
-    let focusedDate = currentMonth.clone().startOf('month');
+    let focusedDate = currentMonth.clone().startOf(format);
     if (props.getFirstFocusableDay) {
       focusedDate = props.getFirstFocusableDay(currentMonth);
     }
@@ -431,6 +440,11 @@ class DayPicker extends React.PureComponent {
   }
 
   onFinalKeyDown(e) {
+    const isFa = moment.locale() === 'fa';
+    const formatW = 'week';
+    const formatM = isFa ? 'jmonth' : 'month';
+    const formatD = 'day';
+
     this.setState({ withMouseInteractions: false });
 
     const {
@@ -456,51 +470,51 @@ class DayPicker extends React.PureComponent {
     switch (e.key) {
       case 'ArrowUp':
         e.preventDefault();
-        newFocusedDate.subtract(1, 'week');
+        newFocusedDate.subtract(1, formatW);
         didTransitionMonth = this.maybeTransitionPrevMonth(newFocusedDate);
         break;
       case 'ArrowLeft':
         e.preventDefault();
         if (isRTL) {
-          newFocusedDate.add(1, 'day');
+          newFocusedDate.add(1, formatD);
         } else {
-          newFocusedDate.subtract(1, 'day');
+          newFocusedDate.subtract(1, formatD);
         }
         didTransitionMonth = this.maybeTransitionPrevMonth(newFocusedDate);
         break;
       case 'Home':
         e.preventDefault();
-        newFocusedDate.startOf('week');
+        newFocusedDate.startOf(formatW);
         didTransitionMonth = this.maybeTransitionPrevMonth(newFocusedDate);
         break;
       case 'PageUp':
         e.preventDefault();
-        newFocusedDate.subtract(1, 'month');
+        newFocusedDate.subtract(1, formatM);
         didTransitionMonth = this.maybeTransitionPrevMonth(newFocusedDate);
         break;
 
       case 'ArrowDown':
         e.preventDefault();
-        newFocusedDate.add(1, 'week');
+        newFocusedDate.add(1, formatW);
         didTransitionMonth = this.maybeTransitionNextMonth(newFocusedDate);
         break;
       case 'ArrowRight':
         e.preventDefault();
         if (isRTL) {
-          newFocusedDate.subtract(1, 'day');
+          newFocusedDate.subtract(1, formatD);
         } else {
-          newFocusedDate.add(1, 'day');
+          newFocusedDate.add(1, formatD);
         }
         didTransitionMonth = this.maybeTransitionNextMonth(newFocusedDate);
         break;
       case 'End':
         e.preventDefault();
-        newFocusedDate.endOf('week');
+        newFocusedDate.endOf(formatW);
         didTransitionMonth = this.maybeTransitionNextMonth(newFocusedDate);
         break;
       case 'PageDown':
         e.preventDefault();
-        newFocusedDate.add(1, 'month');
+        newFocusedDate.add(1, formatM);
         didTransitionMonth = this.maybeTransitionNextMonth(newFocusedDate);
         break;
 
@@ -653,6 +667,7 @@ class DayPicker extends React.PureComponent {
     const firstDayOfWeek = this.getFirstDayOfWeek();
 
     const weekHeaders = [];
+
     for (let i = 0; i < 7; i += 1) {
       weekHeaders.push(currentMonth.clone().day((i + firstDayOfWeek) % 7).format(weekDayFormat));
     }
@@ -680,12 +695,15 @@ class DayPicker extends React.PureComponent {
     const { getFirstFocusableDay, numberOfMonths } = this.props;
 
     let focusedDate;
+
     if (getFirstFocusableDay) {
       focusedDate = getFirstFocusableDay(newMonth);
     }
 
+    const format = moment.locale() === 'fa' ? 'jMonth' : 'month';
+
     if (newMonth && (!focusedDate || !isDayVisible(focusedDate, newMonth, numberOfMonths))) {
-      focusedDate = newMonth.clone().startOf('month');
+      focusedDate = newMonth.clone().startOf(format);
     }
 
     return focusedDate;
@@ -788,6 +806,7 @@ class DayPicker extends React.PureComponent {
   }
 
   updateStateAfterMonthTransition() {
+    const format = moment.locale() === 'fa' ? 'jMonth' : 'month';
     const {
       onPrevMonthClick,
       onNextMonthClick,
@@ -811,15 +830,15 @@ class DayPicker extends React.PureComponent {
     const newMonth = currentMonth.clone();
     const firstDayOfWeek = this.getFirstDayOfWeek();
     if (monthTransition === PREV_TRANSITION) {
-      newMonth.subtract(1, 'month');
+      newMonth.subtract(1, format);
       if (onPrevMonthClick) onPrevMonthClick(newMonth);
-      const newInvisibleMonth = newMonth.clone().subtract(1, 'month');
+      const newInvisibleMonth = newMonth.clone().subtract(1, format);
       const numberOfWeeks = getNumberOfCalendarMonthWeeks(newInvisibleMonth, firstDayOfWeek);
       this.calendarMonthWeeks = [numberOfWeeks, ...this.calendarMonthWeeks.slice(0, -1)];
     } else if (monthTransition === NEXT_TRANSITION) {
-      newMonth.add(1, 'month');
+      newMonth.add(1, format);
       if (onNextMonthClick) onNextMonthClick(newMonth);
-      const newInvisibleMonth = newMonth.clone().add(numberOfMonths, 'month');
+      const newInvisibleMonth = newMonth.clone().add(numberOfMonths, format);
       const numberOfWeeks = getNumberOfCalendarMonthWeeks(newInvisibleMonth, firstDayOfWeek);
       this.calendarMonthWeeks = [...this.calendarMonthWeeks.slice(1), numberOfWeeks];
     } else if (monthTransition === MONTH_SELECTION_TRANSITION) {

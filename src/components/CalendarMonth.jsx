@@ -6,6 +6,7 @@ import momentPropTypes from 'react-moment-proptypes';
 import { forbidExtraProps, mutuallyExclusiveProps, nonNegativeInteger } from 'airbnb-prop-types';
 import { css, withStyles, withStylesPropTypes } from 'react-with-styles';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 
 import { CalendarDayPhrases } from '../defaultPhrases';
 import getPhrasePropTypes from '../utils/getPhrasePropTypes';
@@ -61,7 +62,7 @@ const propTypes = forbidExtraProps({
 });
 
 const defaultProps = {
-  month: moment(),
+  month: moment.locale() === 'fa' ? jMoment() : moment(),
   horizontalMonthPadding: 13,
   isVisible: true,
   enableOutsideDays: false,
@@ -84,7 +85,7 @@ const defaultProps = {
   isFocused: false,
 
   // i18n
-  monthFormat: 'MMMM YYYY', // english locale
+  monthFormat: moment.locale() === 'fa' ? 'jMMMM jYYYY' : 'MMMM YYYY', // english locale
   phrases: CalendarDayPhrases,
   dayAriaLabelFormat: undefined,
   verticalBorderSpacing: undefined,
@@ -225,7 +226,7 @@ class CalendarMonth extends React.PureComponent {
                   key: dayOfWeek,
                   day,
                   daySize,
-                  isOutsideDay: !day || day.month() !== month.month(),
+                  isOutsideDay: !day ? true : moment.locale() === 'fa' ? day.jMonth() !== month.jMonth() : day.month() !== month.month(),
                   tabIndex: isVisible && isSameDay(day, focusedDate) ? 0 : -1,
                   isFocused,
                   onDayMouseEnter,

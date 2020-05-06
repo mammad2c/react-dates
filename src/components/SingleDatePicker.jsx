@@ -1,5 +1,7 @@
 import React from 'react';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
+
 import { css, withStyles, withStylesPropTypes } from 'react-with-styles';
 import { Portal } from 'react-portal';
 import { forbidExtraProps } from 'airbnb-prop-types';
@@ -40,7 +42,7 @@ const propTypes = forbidExtraProps({
   ...withStylesPropTypes,
   ...SingleDatePickerShape,
 });
-
+const momentDay = moment.locale() === 'fa' ? jMoment() : moment();
 const defaultProps = {
   // required props for a functional interactive SingleDatePicker
   date: null,
@@ -113,12 +115,12 @@ const defaultProps = {
   renderMonthElement: null,
   enableOutsideDays: false,
   isDayBlocked: () => false,
-  isOutsideRange: (day) => !isInclusivelyAfterDay(day, moment()),
+  isOutsideRange: (day) => !isInclusivelyAfterDay(day, momentDay),
   isDayHighlighted: () => {},
 
   // internationalization props
   displayFormat: () => moment.localeData().longDateFormat('L'),
-  monthFormat: 'MMMM YYYY',
+  monthFormat: moment.locale() === 'fa' ? 'jMMMM jYYYY' : 'MMMM YYYY',
   weekDayFormat: 'dd',
   phrases: SingleDatePickerPhrases,
   dayAriaLabelFormat: undefined,
@@ -129,6 +131,7 @@ class SingleDatePicker extends React.PureComponent {
     super(props);
 
     this.isTouchDevice = false;
+    this.today = moment.locale() === 'fa' ? jMoment() : moment();
 
     this.state = {
       dayPickerContainerStyles: {},

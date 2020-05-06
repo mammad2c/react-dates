@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 
 import CalendarMonth from '../../src/components/CalendarMonth';
 
@@ -22,9 +23,11 @@ describe('CalendarMonth', () => {
 
     describe('caption', () => {
       it('text is the correctly formatted month title', () => {
-        const MONTH = moment();
+        const isFa = moment.locale() === 'fa';
+        const MONTH = isFa ? jMoment() : moment();
+        const format = isFa ? 'jMMMM jYYYY' : 'MMMM YYYY';
         const captionWrapper = shallow(<CalendarMonth month={MONTH} />).dive().find('strong');
-        expect(captionWrapper.text()).to.equal(MONTH.format('MMMM YYYY'));
+        expect(captionWrapper.text()).to.equal(MONTH.format(format));
       });
     });
 

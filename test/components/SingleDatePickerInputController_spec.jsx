@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 
 import SingleDatePickerInput from '../../src/components/SingleDatePickerInput';
 import SingleDatePickerInputController from '../../src/components/SingleDatePickerInputController';
@@ -13,6 +14,8 @@ import isSameDay from '../../src/utils/isSameDay';
 const today = moment().startOf('day').hours(12);
 
 describe('SingleDatePickerInputController', () => {
+  const isFa = moment.locale() === 'fa';
+
   afterEach(() => {
     sinon.restore();
   });
@@ -111,8 +114,8 @@ describe('SingleDatePickerInputController', () => {
     });
 
     describe('matches custom display format', () => {
-      const customFormat = 'YY|MM[foobar]DD';
-      const customFormatDateString = moment().add(5, 'days').format(customFormat);
+      const customFormat = isFa ? 'jYY jMM jDD' : 'YY|MM[foobar]DD';
+      const customFormatDateString = isFa ? jMoment().add(5, 'days').format(customFormat) : moment().add(5, 'days').format(customFormat);
       it('calls props.onDateChange once', () => {
         const onDateChangeStub = sinon.stub();
         const wrapper = shallow((

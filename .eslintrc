@@ -18,6 +18,7 @@
   "parser": "babel-eslint",
 
   "rules": {
+    "no-nested-ternary": ["off"],
     "react/forbid-foreign-prop-types": 2, // For babel-plugin-transform-react-remove-prop-types
 
     "jsx-a11y/click-events-have-key-events": 1, // TODO: enable

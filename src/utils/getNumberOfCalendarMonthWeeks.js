@@ -9,7 +9,8 @@ export default function getNumberOfCalendarMonthWeeks(
   month,
   firstDayOfWeek = moment.localeData().firstDayOfWeek(),
 ) {
-  const firstDayOfMonth = month.clone().startOf('month');
+  const format = moment.locale() === 'fa' ? 'jMonth' : 'month';
+  const firstDayOfMonth = month.clone().startOf(format);
   const numBlankDays = getBlankDaysBeforeFirstDay(firstDayOfMonth, firstDayOfWeek);
   return Math.ceil((numBlankDays + month.daysInMonth()) / 7);
 }

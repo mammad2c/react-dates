@@ -1,5 +1,5 @@
 import moment from 'moment';
-
+import jMoment from 'moment-jalaali';
 import { DISPLAY_FORMAT, ISO_FORMAT } from '../constants';
 
 export default function toMomentObject(dateString, customFormat) {
@@ -7,6 +7,13 @@ export default function toMomentObject(dateString, customFormat) {
     ? [customFormat, DISPLAY_FORMAT, ISO_FORMAT]
     : [DISPLAY_FORMAT, ISO_FORMAT];
 
-  const date = moment(dateString, dateFormats, true);
-  return date.isValid() ? date.hour(12) : null;
+  let date;
+
+  if (moment.locale() === 'fa') {
+    date = jMoment(dateString, customFormat ? dateFormats : 'jYYYY/jMM/jDD', true);
+  } else {
+    date = moment(dateString, dateFormats, true);
+  }
+
+  return date && date.isValid() ? date.hour(12) : null;
 }
