@@ -30,7 +30,7 @@ const defaultProps = {
   endDateId: END_DATE,
 
   // calendar presentation and interaction related props
-  numberOfMonths: 1,
+  numberOfMonths: 2,
   isRTL: true,
 
 };

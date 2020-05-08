@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import momentPropTypes from 'react-moment-proptypes';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import omit from 'lodash/omit';
 
 import SingleDatePicker from '../src/components/SingleDatePicker';
@@ -85,6 +86,10 @@ class SingleDatePickerWrapper extends React.Component {
       focused: props.autoFocus,
       date: props.initialDate,
     };
+
+    jMoment.locale('fa');
+    jMoment.loadPersian({
+    });
 
     this.onDateChange = this.onDateChange.bind(this);
     this.onFocusChange = this.onFocusChange.bind(this);
